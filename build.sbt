@@ -1,5 +1,3 @@
-import testgen.TestgenKeys._
-
 scalaVersion := "2.9.1"
 
 crossScalaVersions := Seq("2.9.1")
@@ -24,17 +22,5 @@ seq(lsSettings :_*)
 // https://github.com/typesafehub/sbtscalariform
 
 seq(scalariformSettings: _*)
-
-// https://github.com/seratch/testgen-sbt
-
-seq(testgenSettings: _*)
-
-testgenEncoding in Compile := "UTF-8"
-
-testgenTestTemplate in Compile := "scalatest.FlatSpec"
-
-testgenScalaTestMatchers in Compile := "ShouldMatchers"
-
-testgenLineBreak in Compile := "LF"
 
 
