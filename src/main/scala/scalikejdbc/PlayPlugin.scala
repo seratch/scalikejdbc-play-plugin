@@ -30,6 +30,10 @@ class PlayPlugin(app: Application) extends BoneCPPlugin(app) {
 
   private lazy val config = app.configuration.getConfig("db").getOrElse(Configuration.empty)
 
+  private def configValueOptional(name: String, key: String): Option[String] = {
+    config.getString(name + "." + key)
+  }
+
   private def configValue(name: String, key: String): String = {
     config.getString(name + "." + key) getOrElse {
       throw config.reportError(name, "Missing configuration [db." + name + "." + key + "]")
@@ -38,8 +42,8 @@ class PlayPlugin(app: Application) extends BoneCPPlugin(app) {
 
   config.subKeys map { name =>
     val url = configValue(name, "url")
-    val user = configValue(name, "user")
-    val password = configValue(name, "password")
+    val user = configValueOptional(name, "user") getOrElse ("")
+    val password = configValueOptional(name, "password") getOrElse ("")
     name match {
       case "default" => ConnectionPool.singleton(url, user, password)
       case _ => ConnectionPool.add(Symbol(name), url, user, password)
