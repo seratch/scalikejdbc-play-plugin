@@ -4,13 +4,22 @@ import java.util.Date
 
 import scalikejdbc._
 
-case class Task(
-  id: Option[Long], 
+case class NewTask(
   folder: String, 
   project: Long, 
   title: String, 
   done: Boolean, 
   dueDate: Option[Date], 
+  assignedTo: Option[String]
+)
+
+case class Task(
+  id: Long, 
+  folder: String,
+  project: Long,
+  title: String,
+  done: Boolean,
+  dueDate: Option[Date],
   assignedTo: Option[String]
 )
 
@@ -22,7 +31,7 @@ object Task {
    * Parse a Task from a ResultSet
    */
   val simple = (rs: WrappedResultSet) => Task(
-     Option(rs.long("id")), 
+     rs.long("id"), 
      rs.string("folder"), 
      rs.long("project"), 
      rs.string("title"), 
@@ -33,7 +42,7 @@ object Task {
   
   val withProject = (rs: WrappedResultSet) => (
     Task(
-      Option(rs.long("task.id")), 
+      rs.long("task.id"),
       rs.string("task.folder"), 
       rs.long("task.project"), 
       rs.string("task.title"), 
@@ -42,7 +51,7 @@ object Task {
       Option(rs.string("task.assigned_to"))
     ), 
     Project(
-      Option(rs.long("project.id")), 
+      rs.long("project.id"), 
       rs.string("project.folder"), 
       rs.string("project.name")
     )
@@ -122,7 +131,8 @@ object Task {
    */
   def renameFolder(projectId: Long, folder: String, newName: String) {
     DB localTx { implicit session =>
-      SQL("update task set folder = ? where folder = ? and project = ?").bind(folder, newName, projectId).update.apply()
+      SQL("update task set folder = ? where folder = ? and project = ?")
+        .bind(folder, newName, projectId).update.apply()
     }
   }
   
@@ -145,9 +155,10 @@ object Task {
   /**
    * Create a Task.
    */
-  def create(task: Task): Task = {
+  def create(task: NewTask): Task = {
     DB localTx { implicit session =>
-      val id = task.id.orElse(SQL("select next value for task_seq as v from dual").map(rs => rs.long("v")).single.apply())
+      val newId = SQL("select next value for task_seq as v from dual").map(rs => rs.long("v")).single.apply().get
+      // TODO
       val dueDate = new java.sql.Timestamp(task.dueDate.map(d => d.getTime).getOrElse(0))
       SQL(
         """
@@ -156,7 +167,7 @@ object Task {
           )
         """
       ).bind(
-        id,
+        newId,
         task.folder, 
         task.project, 
         task.title, 
@@ -164,7 +175,16 @@ object Task {
         dueDate,
         task.assignedTo
       ).update.apply()
-      task.copy(id = id, dueDate = Option(dueDate))
+
+      Task(
+        id = newId,
+        folder = task.folder,
+        project = task.project,
+        title = task.title,
+        done = task.done,
+        dueDate = Option(dueDate),
+        assignedTo = task.assignedTo
+      )
     }
   }
   

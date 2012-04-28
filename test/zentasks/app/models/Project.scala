@@ -2,13 +2,22 @@ package models
 
 import scalikejdbc._
 
-case class Project(id: Option[Long], folder: String, name: String)
+case class NewProject(
+  folder: String, 
+  name: String
+)
+
+case class Project(
+  id: Long, 
+  folder: String, 
+  name: String
+)
 
 object Project {
   
   // -- Queries
   private val simple = (rs: WrappedResultSet) => Project(
-    Option(rs.long("id")), 
+    rs.long("id"), 
     rs.string("folder"), 
     rs.string("name")
   )
@@ -124,24 +133,23 @@ object Project {
   /**
    * Create a Project.
    */
-  def create(project: Project, members: Seq[String]): Project = {
+  def create(project: NewProject, members: Seq[String]): Project = {
      DB localTx { implicit session =>
        // Insert the project
-       val id: Option[Long] = project.id.orElse {
-         SQL("select next value for project_seq as v from dual").map(rs => rs.long("v")).single.apply()
-       }
+       val newId: Long = SQL("select next value for project_seq as v from dual")
+         .map(rs => rs.long("v")).single.apply().get
        SQL(
          """
            insert into project (id, name, folder) values (
              ?, ?, ? 
            )
          """
-       ).bind(id, project.name, project.folder).update.apply()
+       ).bind(newId, project.name, project.folder).update.apply()
        // Add members
        members.foreach { email =>
-         SQL("insert into project_member values (?, ?)").bind(id, email).update.apply()
+         SQL("insert into project_member values (?, ?)").bind(newId, email).update.apply()
        }
-       project.copy(id = id)
+       Project(id = newId, name = project.name, folder = project.folder)
      }
   }
   

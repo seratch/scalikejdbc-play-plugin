@@ -86,29 +86,29 @@ create sequence task_seq start with 1000;
         User("erwan@sample.com", "Erwan Loisant", "secret")
       ).foreach(User.create)
       
-      Seq(
-        Project(Some(1), "Play framework", "Play 2.0") -> Seq("guillaume@sample.com", "maxime@sample.com", "sadek@sample.com", "erwan@sample.com"),
-        Project(Some(2), "Play framework", "Play 1.2.4") -> Seq("guillaume@sample.com", "erwan@sample.com"),
-        Project(Some(3), "Play framework", "Website") -> Seq("guillaume@sample.com", "maxime@sample.com"),
-        Project(Some(4), "Zenexity", "Secret project") -> Seq("guillaume@sample.com", "maxime@sample.com", "sadek@sample.com", "erwan@sample.com"),
-        Project(Some(5), "Zenexity", "Playmate") -> Seq("maxime@sample.com"),
-        Project(Some(6), "Personal", "Things to do") -> Seq("guillaume@sample.com"),
-        Project(Some(7), "Zenexity", "Play samples") -> Seq("guillaume@sample.com", "maxime@sample.com"),
-        Project(Some(8), "Personal", "Private") -> Seq("maxime@sample.com"),
-        Project(Some(9), "Personal", "Private") -> Seq("guillaume@sample.com"),
-        Project(Some(10), "Personal", "Private") -> Seq("erwan@sample.com"),
-        Project(Some(11), "Personal", "Private") -> Seq("sadek@sample.com")
-      ).foreach {
+      val projects = Seq(
+        NewProject("Play framework", "Play 2.0") -> Seq("guillaume@sample.com", "maxime@sample.com", "sadek@sample.com", "erwan@sample.com"),
+        NewProject("Play framework", "Play 1.2.4") -> Seq("guillaume@sample.com", "erwan@sample.com"),
+        NewProject("Play framework", "Website") -> Seq("guillaume@sample.com", "maxime@sample.com"),
+        NewProject("Zenexity", "Secret project") -> Seq("guillaume@sample.com", "maxime@sample.com", "sadek@sample.com", "erwan@sample.com"),
+        NewProject("Zenexity", "Playmate") -> Seq("maxime@sample.com"),
+        NewProject("Personal", "Things to do") -> Seq("guillaume@sample.com"),
+        NewProject("Zenexity", "Play samples") -> Seq("guillaume@sample.com", "maxime@sample.com"),
+        NewProject("Personal", "Private") -> Seq("maxime@sample.com"),
+        NewProject("Personal", "Private") -> Seq("guillaume@sample.com"),
+        NewProject("Personal", "Private") -> Seq("erwan@sample.com"),
+        NewProject("Personal", "Private") -> Seq("sadek@sample.com")
+      ).map {
         case (project,members) => Project.create(project, members)
       }
 
       Seq(
-        Task(Some(1), "Todo", 1, "Fix the documentation", false, None, Some("guillaume@sample.com")),
-        Task(Some(2), "Urgent", 1, "Prepare the beta release", false, Some(date("2011-11-15")), None),
-        Task(Some(3), "Todo", 9, "Buy some milk", false, None, None),
-        Task(Some(4), "Todo", 2, "Check 1.2.4-RC2", false, Some(date("2011-11-18")), Some("guillaume@sample.com")),
-        Task(Some(5), "Todo", 7, "Finish zentask integration", true, Some(date("2011-11-15")), Some("maxime@sample.com")),
-        Task(Some(6), "Todo", 4, "Release the secret project", false, Some(date("2012-01-01")), Some("sadek@sample.com"))
+        NewTask("Todo", projects(0).id, "Fix the documentation", false, None, Some("guillaume@sample.com")),
+        NewTask("Urgent", projects(0).id, "Prepare the beta release", false, Some(date("2011-11-15")), None),
+        NewTask("Todo", projects(8).id, "Buy some milk", false, None, None),
+        NewTask("Todo", projects(1).id, "Check 1.2.4-RC2", false, Some(date("2011-11-18")), Some("guillaume@sample.com")),
+        NewTask("Todo", projects(6).id, "Finish zentask integration", true, Some(date("2011-11-15")), Some("maxime@sample.com")),
+        NewTask( "Todo", projects(3).id, "Release the secret project", false, Some(date("2012-01-01")), Some("sadek@sample.com"))
       ).foreach(Task.create)
       
     }

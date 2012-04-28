@@ -39,7 +39,7 @@ object Projects extends Controller with Secured {
       folder => Ok(
         views.html.projects.item(
           Project.create(
-            Project(None, folder, "New project"), 
+            NewProject(folder, "New project"), 
             Seq(username)
           )
         )

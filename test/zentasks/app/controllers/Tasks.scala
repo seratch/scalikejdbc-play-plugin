@@ -44,7 +44,7 @@ object Tasks extends Controller with Secured {
       {
         case (title, dueDate, assignedTo) => 
           val task =  Task.create(
-            Task(None, folder, project, title, false, dueDate, assignedTo)
+            NewTask(folder, project, title, false, dueDate, assignedTo)
           )
           Ok(html.tasks.item(task))
       }
