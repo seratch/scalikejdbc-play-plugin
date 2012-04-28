@@ -23,4 +23,33 @@ seq(lsSettings :_*)
 
 seq(scalariformSettings: _*)
 
+// publish
+
+publishMavenStyle := true
+
+publishArtifact in Test := false
+
+pomIncludeRepository := { x => false }
+
+pomExtra := (
+  <url>http://seratch.github.com/scalikejdbc</url>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>git@github.com:seratch/scalikejdbc.git</url>
+    <connection>scm:git:git@github.com:seratch/scalikejdbc.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>seratch</id>
+      <name>Kazuhuiro Sera</name>
+      <url>http://seratch.net/</url>
+    </developer>
+  </developers>
+)
 
