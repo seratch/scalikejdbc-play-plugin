@@ -64,10 +64,7 @@ object Project {
     rs.string("folder"), 
     rs.string("name")
   )
-    
-  /**
-   * Retrieve a Project from id.
-   */
+
   def findById(id: Long): Option[Project] = {
     DB readOnly { implicit session =>
       SQL("select * from project where id = ?").bind(id).map(simple).single.apply()
