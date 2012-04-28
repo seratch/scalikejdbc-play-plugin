@@ -55,7 +55,7 @@ object User {
    * Create a User.
    */
   def create(user: User): User = {
-    DB readOnly { implicit session =>
+    DB localTx { implicit session =>
       SQL(
         """
           insert into user values (
