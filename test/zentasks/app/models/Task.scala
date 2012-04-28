@@ -158,8 +158,6 @@ object Task {
   def create(task: NewTask): Task = {
     DB localTx { implicit session =>
       val newId = SQL("select next value for task_seq as v from dual").map(rs => rs.long("v")).single.apply().get
-      // TODO
-      val dueDate = new java.sql.Timestamp(task.dueDate.map(d => d.getTime).getOrElse(0))
       SQL(
         """
           insert into task (id, folder, project, title, done, due_date, assigned_to) values (
@@ -172,7 +170,7 @@ object Task {
         task.project, 
         task.title, 
         task.done,
-        dueDate,
+        task.dueDate,
         task.assignedTo
       ).update.apply()
 
@@ -182,7 +180,7 @@ object Task {
         project = task.project,
         title = task.title,
         done = task.done,
-        dueDate = Option(dueDate),
+        dueDate = task.dueDate,
         assignedTo = task.assignedTo
       )
     }
