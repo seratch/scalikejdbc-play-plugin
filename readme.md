@@ -20,8 +20,8 @@ https://github.com/seratch/scalikejdbc-play-plugin/tree/master/test/zentasks
 
 ```scala
 val appDependencies = Seq(
-  "com.github.seratch" %% "scalikejdbc-play-plugin" % "0.1.0"
-  "com.github.seratch" %% "scalikejdbc"             % "0.6.5"
+  "com.github.seratch" %% "scalikejdbc-play-plugin" % "0.1.0",
+  "com.github.seratch" %% "scalikejdbc"             % "[0.6,)"
 )
 
 val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
@@ -38,7 +38,7 @@ This plugin uses the default Database configuration.
 # ~~~~~ 
 # You can declare as many datasources as you want.
 # By convention, the default datasource is named `default`
-db.default.driver=org.h2.Driver
+db.default.driver="org.h2.Driver"
 db.default.url="jdbc:h2:mem:play"
 db.default.user="sa"
 db.default.password="sa"
@@ -73,4 +73,11 @@ object Project {
 
 ...
 ```
+
+## Generating models
+
+See also:
+
+https://github.com/seratch/scalikejdbc-mapper-generator
+
 
