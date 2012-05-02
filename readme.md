@@ -42,6 +42,10 @@ db.default.driver="org.h2.Driver"
 db.default.url="jdbc:h2:mem:play"
 db.default.user="sa"
 db.default.password="sa"
+
+# You can disable the default DB plugin
+dbplugin=disabled
+evolutionplugin=disabled
 ```
 
 ### conf/play.plugins
