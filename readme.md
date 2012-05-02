@@ -2,11 +2,13 @@
 
 ## ScalikeJDBC
 
-A think JDBC wrapper.
+A thin JDBC wrapper library.
 
 https://github.com/seratch/scalikejdbc
 
 ## Play 2.0 Scala
+
+ScalikeJDBC works with Play20 seamlessly.
 
 http://www.playframework.org/documentation/2.0/ScalaHome
 
