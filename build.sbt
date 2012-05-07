@@ -10,8 +10,8 @@ resolvers ++= Seq(
 
 libraryDependencies <++= (scalaVersion) { scalaVersion =>
   Seq(
-    "com.github.seratch" %% "scalikejdbc" % "[0.6,)",
-    "play" %% "play" % "[2,)"
+    "com.github.seratch" %% "scalikejdbc" % "[1.0,)" % "provided",
+    "play" %% "play" % "[2,)" % "provided"
   )
 }
 
@@ -32,7 +32,7 @@ publishArtifact in Test := false
 pomIncludeRepository := { x => false }
 
 pomExtra := (
-  <url>http://seratch.github.com/scalikejdbc</url>
+  <url>http://seratch.github.com/scalikejdbc-play-plugin</url>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -41,8 +41,8 @@ pomExtra := (
     </license>
   </licenses>
   <scm>
-    <url>git@github.com:seratch/scalikejdbc.git</url>
-    <connection>scm:git:git@github.com:seratch/scalikejdbc.git</connection>
+    <url>git@github.com:seratch/scalikejdbc-play-plugin.git</url>
+    <connection>scm:git:git@github.com:seratch/scalikejdbc-play-plugin.git</connection>
   </scm>
   <developers>
     <developer>

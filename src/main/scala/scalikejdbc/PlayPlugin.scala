@@ -16,17 +16,12 @@
 package scalikejdbc
 
 import play.api._
-import play.api.db.BoneCPPlugin
-
-import java.sql.Connection
 import scalikejdbc._
 
 /**
  * The Play plugin to use ScalikeJDBC
  */
-class PlayPlugin(app: Application) extends BoneCPPlugin(app) {
-
-  override def onStart() {}
+class PlayPlugin(app: Application) extends Plugin {
 
   private lazy val config = app.configuration.getConfig("db").getOrElse(Configuration.empty)
 
@@ -41,12 +36,23 @@ class PlayPlugin(app: Application) extends BoneCPPlugin(app) {
   }
 
   config.subKeys map { name =>
+
     val url = configValue(name, "url")
     val user = configValueOptional(name, "user") getOrElse ("")
     val password = configValueOptional(name, "password") getOrElse ("")
+
+    val defaultSettings = new ConnectionPoolSettings
+    val poolInitialSize: Int = configValueOptional(name, "poolInitialSize") map (v => v.toInt) getOrElse (defaultSettings.initialSize)
+    val poolMaxSize: Int = configValueOptional(name, "poolMaxSize") map (v => v.toInt) getOrElse (defaultSettings.maxSize)
+    val poolValidationQuery = configValueOptional(name, "poolValidationQuery") getOrElse (defaultSettings.validationQuery)
+    val settings = new ConnectionPoolSettings(
+      initialSize = poolInitialSize,
+      maxSize = poolMaxSize,
+      validationQuery = poolValidationQuery)
+
     name match {
-      case "default" => ConnectionPool.singleton(url, user, password)
-      case _ => ConnectionPool.add(Symbol(name), url, user, password)
+      case "default" => ConnectionPool.singleton(url, user, password, settings)
+      case _ => ConnectionPool.add(Symbol(name), url, user, password, settings)
     }
   }
 
