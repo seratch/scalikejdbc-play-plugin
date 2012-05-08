@@ -37,6 +37,9 @@ class PlayPlugin(app: Application) extends Plugin {
 
   config.subKeys map { name =>
 
+    // load the jdbc driver
+    configValueOptional(name, "driver") map { driver => Class.forName(driver) }
+
     val url = configValue(name, "url")
     val user = configValueOptional(name, "user") getOrElse ("")
     val password = configValueOptional(name, "password") getOrElse ("")
