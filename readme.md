@@ -22,8 +22,8 @@ https://github.com/seratch/scalikejdbc-play-plugin/tree/master/test/zentasks
 
 ```scala
 val appDependencies = Seq(
-  "com.github.seratch" %% "scalikejdbc-play-plugin" % "0.1.0",
-  "com.github.seratch" %% "scalikejdbc"             % "[0.6,)"
+  "com.github.seratch" %% "scalikejdbc"             % "1.0.0",
+  "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.0.0"
 )
 
 val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
@@ -45,6 +45,11 @@ db.default.url="jdbc:h2:mem:play"
 db.default.user="sa"
 db.default.password="sa"
 
+# original properties
+#db.default.poolInitialSize=10
+#db.default.poolMaxSize=20
+#db.default.poolValidationQuery="select 1 from dual"
+
 # You can disable the default DB plugin
 dbplugin=disabled
 evolutionplugin=disabled
@@ -53,7 +58,7 @@ evolutionplugin=disabled
 ### conf/play.plugins
 
 ```
-10000:scalikejdbc.PlayPlugin
+777:scalikejdbc.PlayPlugin
 ```
 
 ### app/models/Project.scala

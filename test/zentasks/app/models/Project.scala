@@ -126,7 +126,7 @@ object Project {
           join project_member on project_member.user_email = user.email 
           where project_member.project_id = ? and user.email = ?
         """
-      ).bind(project, user).map(rs => rs.boolean("is_member")).single.apply().getOrElse(false)
+      ).bind(project, user).map(rs => rs.boolean("is_member").asInstanceOf[Boolean]).single.apply().getOrElse(false)
     }
   }
    

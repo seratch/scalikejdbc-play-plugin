@@ -148,7 +148,7 @@ object Task {
           join project_member on project_member.project_id = project.id 
           where project_member.user_email = ? and task.id = ?
         """
-      ).bind(user, task).map(rs => rs.boolean("v")).single.apply().getOrElse(false)
+      ).bind(user, task).map(rs => rs.boolean("v").asInstanceOf[Boolean]).single.apply().getOrElse(false)
     }
   }
 
