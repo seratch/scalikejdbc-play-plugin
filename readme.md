@@ -22,8 +22,8 @@ https://github.com/seratch/scalikejdbc-play-plugin/tree/master/test/zentasks
 
 ```scala
 val appDependencies = Seq(
-  "com.github.seratch" %% "scalikejdbc"             % "1.0.2",
-  "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.0.2"
+  "com.github.seratch" %% "scalikejdbc"             % "1.0.3",
+  "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.0.3"
 )
 
 val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
