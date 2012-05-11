@@ -22,8 +22,8 @@ https://github.com/seratch/scalikejdbc-play-plugin/tree/master/test/zentasks
 
 ```scala
 val appDependencies = Seq(
-  "com.github.seratch" %% "scalikejdbc"             % "1.0.0",
-  "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.0.0"
+  "com.github.seratch" %% "scalikejdbc"             % "1.0.2",
+  "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.0.2"
 )
 
 val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
@@ -40,15 +40,22 @@ This plugin uses the default Database configuration.
 # ~~~~~ 
 # You can declare as many datasources as you want.
 # By convention, the default datasource is named `default`
-db.default.driver="org.h2.Driver"
+db.default.driver=org.h2.Driver
 db.default.url="jdbc:h2:mem:play"
 db.default.user="sa"
 db.default.password="sa"
 
-# original properties
+# ScalikeJDBC original configuration
+
 #db.default.poolInitialSize=10
-#db.default.poolMaxSize=20
-#db.default.poolValidationQuery="select 1 from dual"
+#db.default.poolMaxSize=10
+#db.default.poolValidationQuery=
+
+db.global.loggingSQLAndTime.enabled=true
+db.global.loggingSQLAndTime.logLevel=debug
+db.global.loggingSQLAndTime.warningEnabled=true
+db.global.loggingSQLAndTime.warningThresholdMillis=1000
+db.global.loggingSQLAndTime.warningLogLevel=warn
 
 # You can disable the default DB plugin
 dbplugin=disabled
