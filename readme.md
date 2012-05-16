@@ -22,8 +22,8 @@ https://github.com/seratch/scalikejdbc-play-plugin/tree/master/test/zentasks
 
 ```scala
 val appDependencies = Seq(
-  "com.github.seratch" %% "scalikejdbc"             % "1.0.3",
-  "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.0.2"
+  "com.github.seratch" %% "scalikejdbc"             % "1.1.1",
+  "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.1.1"
 )
 
 val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
@@ -77,16 +77,14 @@ case class Project(id: Long, folder: String, name: String)
 
 object Project {
 
-  private val simple = (rs: WrappedResultSet) => Project(
+  private val * = (rs: WrappedResultSet) => Project(
     rs.long("id"), 
     rs.string("folder"), 
     rs.string("name")
   )
 
-  def findById(id: Long): Option[Project] = {
-    DB readOnly { implicit session =>
-      SQL("select * from project where id = ?").bind(id).map(simple).single.apply()
-    }
+  def find(id: Long)(implicit session: DBSession = AutoSession): Option[Project] = {
+    SQL("select * from project where id = ?").bind(id).map(*).single.apply()
   }
 
 ...
