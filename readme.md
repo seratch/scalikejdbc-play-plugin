@@ -51,11 +51,11 @@ db.default.password="sa"
 #db.default.poolMaxSize=10
 #db.default.poolValidationQuery=
 
-db.global.loggingSQLAndTime.enabled=true
-db.global.loggingSQLAndTime.logLevel=debug
-db.global.loggingSQLAndTime.warningEnabled=true
-db.global.loggingSQLAndTime.warningThresholdMillis=1000
-db.global.loggingSQLAndTime.warningLogLevel=warn
+scalikejdbc.global.loggingSQLAndTime.enabled=true
+scalikejdbc.global.loggingSQLAndTime.logLevel=debug
+scalikejdbc.global.loggingSQLAndTime.warningEnabled=true
+scalikejdbc.global.loggingSQLAndTime.warningThresholdMillis=1000
+scalikejdbc.global.loggingSQLAndTime.warningLogLevel=warn
 
 # You can disable the default DB plugin
 dbplugin=disabled
