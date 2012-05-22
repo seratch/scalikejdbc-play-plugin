@@ -49,6 +49,9 @@ class PlayPlugin(app: Application) extends Plugin {
       }
 
       name match {
+        case "global" =>
+          Logger(classOf[PlayPlugin]).warn(
+            "Configuration with \"db.global\" is ignored. Use \"scalikejdbc.global\" instead.")
         case "default" =>
           val (url, user, password, settings) = load(name)
           ConnectionPool.singleton(url, user, password, settings)
