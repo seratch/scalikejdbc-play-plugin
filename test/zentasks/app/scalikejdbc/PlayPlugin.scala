@@ -22,17 +22,9 @@ import play.api._
  */
 class PlayPlugin(app: Application) extends Plugin {
 
+  import PlayPlugin._
+
   private lazy val dbConfig = app.configuration.getConfig("db").getOrElse(Configuration.empty)
-
-  private def opt(name: String, key: String)(implicit config: Configuration): Option[String] = {
-    dbConfig.getString(name + "." + key)
-  }
-
-  private def require(name: String, key: String)(implicit config: Configuration): String = {
-    dbConfig.getString(name + "." + key) getOrElse {
-      throw dbConfig.reportError(name, "Missing dbConfiguration [db." + name + "." + key + "]")
-    }
-  }
 
   dbConfig.subKeys map {
     name =>
@@ -76,6 +68,20 @@ class PlayPlugin(app: Application) extends Plugin {
         warningThresholdMillis = opt(loggingSQLAndTime, "warningThresholdMillis").map(_.toLong).getOrElse(default.warningThresholdMillis),
         warningLogLevel = opt(loggingSQLAndTime, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel)
       )
+  }
+
+}
+
+object PlayPlugin {
+
+  def opt(name: String, key: String)(implicit config: Configuration): Option[String] = {
+    config.getString(name + "." + key)
+  }
+
+  def require(name: String, key: String)(implicit config: Configuration): String = {
+    config.getString(name + "." + key) getOrElse {
+      throw config.reportError(name, "Missing configuration [db." + name + "." + key + "]")
+    }
   }
 
 }
