@@ -27,7 +27,8 @@ object Project {
    */
   def findById(id: Long): Option[Project] = {
     DB readOnly { implicit session =>
-      SQL("select * from project where id = ?").bind(id).map(simple).single.apply()
+      SQL("select * from project where id = {id}")
+        .bindByName('id -> id).map(simple).single.apply()
     }
   }
   
@@ -40,9 +41,9 @@ object Project {
         """
           select * from project 
           join project_member on project.id = project_member.project_id 
-          where project_member.user_email = ?
+          where project_member.user_email = {user}
         """
-      ).bind(user).map(simple).list.apply().toSeq
+      ).bindByName('user -> user).map(simple).list.apply().toSeq
     }
   }
   
@@ -51,7 +52,8 @@ object Project {
    */
   def rename(id: Long, newName: String) {
     DB localTx { implicit session =>
-      SQL("update project set name = ? where id = ?").bind(id, newName).update.apply()
+      SQL("update project set name = {name} where id = {id}")
+        .bindByName('id -> id, 'name -> newName).update.apply()
     }
   }
   
@@ -60,7 +62,7 @@ object Project {
    */
   def delete(id: Long) {
     DB localTx { implicit session => 
-      SQL("delete from project where id = ?").bind(id).update.apply()
+      SQL("delete from project where id = {id}").bindByName('id -> id).update.apply()
     }
   }
   
@@ -69,7 +71,7 @@ object Project {
    */
   def deleteInFolder(folder: String) {
     DB localTx { implicit session => 
-      SQL("delete from project where folder = ?").bind(folder).update.apply()
+      SQL("delete from project where folder = {folder}").bindByName('folder -> folder).update.apply()
     }
   }
   
@@ -78,7 +80,8 @@ object Project {
    */
   def renameFolder(folder: String, newName: String) {
     DB localTx { implicit session =>
-      SQL("update project set folder = ? where folder = ?").bind(folder, newName).update.apply()
+      SQL("update project set folder = {newName} where folder = {folder}")
+        .bindByName('folder -> folder, 'newName -> newName).update.apply()
     }
   }
   
@@ -91,9 +94,9 @@ object Project {
         """
           select user.* from user 
           join project_member on project_member.user_email = user.email 
-          where project_member.project_id = ?
+          where project_member.project_id = {project}
         """
-      ).bind(project).map(User.simple).list.apply().toSeq
+      ).bindByName('project -> project).map(User.simple).list.apply().toSeq
     }
   }
   
@@ -102,7 +105,8 @@ object Project {
    */
   def addMember(project: Long, user: String) {
     DB localTx { implicit session =>
-      SQL("insert into project_member values(?, ?)").bind(project, user).map(simple).update.apply()
+      SQL("insert into project_member values({project}, {user})")
+        .bindByName('project -> project, 'user -> user).map(simple).update.apply()
     }
   }
   
@@ -111,7 +115,8 @@ object Project {
    */
   def removeMember(project: Long, user: String) {
     DB localTx { implicit session =>
-      SQL("delete from project_member where project_id = ? and user_email = ?").bind(project, user).update.apply()
+      SQL("delete from project_member where project_id = {project} and user_email = {user}")
+        .bindByName('project -> project, 'user -> user).update.apply()
     }
   }
   
@@ -124,9 +129,10 @@ object Project {
         """
           select count(user.email) = 1 as is_member from user 
           join project_member on project_member.user_email = user.email 
-          where project_member.project_id = ? and user.email = ?
+          where project_member.project_id = {project} and user.email = {user}
         """
-      ).bind(project, user).map(rs => rs.boolean("is_member").asInstanceOf[Boolean]).single.apply().getOrElse(false)
+      ).bindByName('project -> project, 'user -> user)
+        .map(rs => rs.boolean("is_member").asInstanceOf[Boolean]).single.apply().getOrElse(false)
     }
   }
    
@@ -141,13 +147,14 @@ object Project {
        SQL(
          """
            insert into project (id, name, folder) values (
-             ?, ?, ? 
+             {id}, {name}, {folder} 
            )
          """
-       ).bind(newId, project.name, project.folder).update.apply()
+       ).bindByName('id -> newId, 'name -> project.name, 'folder -> project.folder).update.apply()
        // Add members
        members.foreach { email =>
-         SQL("insert into project_member values (?, ?)").bind(newId, email).update.apply()
+         SQL("insert into project_member values ({id}, {email})")
+           .bindByName('id -> newId, 'email -> email).update.apply()
        }
        Project(id = newId, name = project.name, folder = project.folder)
      }

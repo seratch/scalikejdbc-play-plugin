@@ -64,7 +64,7 @@ object Task {
    */
   def findById(id: Long): Option[Task] = {
     DB readOnly { implicit session =>
-      SQL("select * from task where id = ?").bind(id).map(simple).single.apply()
+      SQL("select * from task where id = {id}").bindByName('id -> id).map(simple).single.apply()
     }
   }
   
@@ -78,9 +78,9 @@ object Task {
           select * from task 
           join project_member on project_member.project_id = task.project 
           join project on project.id = project_member.project_id
-          where task.done = false and project_member.user_email = ?
+          where task.done = false and project_member.user_email = {user}
         """
-      ).bind(user).map(withProject).list.apply().toSeq
+      ).bindByName('user -> user).map(withProject).list.apply().toSeq
     }
   }
   
@@ -92,9 +92,9 @@ object Task {
       SQL(
         """
           select * from task 
-          where task.project = ?
+          where task.project = {project}
         """
-      ).bind(project).map(simple).list.apply().toSeq
+      ).bindByName('project -> project).map(simple).list.apply().toSeq
     }
   }
 
@@ -103,7 +103,7 @@ object Task {
    */
   def delete(id: Long) {
     DB localTx { implicit session =>
-      SQL("delete from task where id = ?").bind(id).update.apply()
+      SQL("delete from task where id = {id}").bindByName('id -> id).update.apply()
     }
   }
   
@@ -112,8 +112,8 @@ object Task {
    */
   def deleteInFolder(projectId: Long, folder: String) {
     DB localTx { implicit session =>
-      SQL("delete from task where project = ? and folder = ?")
-        .bind(projectId, folder).update.apply()
+      SQL("delete from task where project = {project} and folder = {folder}")
+        .bindByName('project -> projectId, 'foler -> folder).update.apply()
     }
   }
   
@@ -122,7 +122,8 @@ object Task {
    */
   def markAsDone(taskId: Long, done: Boolean) {
     DB localTx { implicit session =>
-      SQL("update task set done = ? where id = ?").bind(taskId, done).update.apply()
+      SQL("update task set done = {done} where id = {id}")
+        .bindByName('id -> taskId, 'done -> done).update.apply()
     }
   }
   
@@ -131,8 +132,8 @@ object Task {
    */
   def renameFolder(projectId: Long, folder: String, newName: String) {
     DB localTx { implicit session =>
-      SQL("update task set folder = ? where folder = ? and project = ?")
-        .bind(folder, newName, projectId).update.apply()
+      SQL("update task set folder = {newFolder} where folder = {folder} and project = {project}")
+        .bindByName('folder -> folder, 'newFolder -> newName, 'project -> projectId).update.apply()
     }
   }
   
@@ -146,9 +147,10 @@ object Task {
           select count(task.id) = 1 as v from task 
           join project on task.project = project.id 
           join project_member on project_member.project_id = project.id 
-          where project_member.user_email = ? and task.id = ?
+          where project_member.user_email = {user} and task.id = {task}
         """
-      ).bind(user, task).map(rs => rs.boolean("v").asInstanceOf[Boolean]).single.apply().getOrElse(false)
+      ).bindByName('user -> user, 'task -> task)
+        .map(rs => rs.boolean("v").asInstanceOf[Boolean]).single.apply().getOrElse(false)
     }
   }
 
@@ -157,21 +159,22 @@ object Task {
    */
   def create(task: NewTask): Task = {
     DB localTx { implicit session =>
+println(task.dueDate)
       val newId = SQL("select next value for task_seq as v from dual").map(rs => rs.long("v")).single.apply().get
       SQL(
         """
           insert into task (id, folder, project, title, done, due_date, assigned_to) values (
-            ?, ?, ?, ?, ?, ?, ?
+            {id}, {folder}, {project}, {title}, {done}, {dueDate}, {assignedTo} 
           )
         """
-      ).bind(
-        newId,
-        task.folder, 
-        task.project, 
-        task.title, 
-        task.done,
-        task.dueDate,
-        task.assignedTo
+      ).bindByName(
+        'id -> newId,
+        'folder -> task.folder, 
+        'project -> task.project, 
+        'title -> task.title, 
+        'done -> task.done,
+        'dueDate -> task.dueDate,
+        'assignedTo -> task.assignedTo
       ).update.apply()
 
       Task(

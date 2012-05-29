@@ -24,7 +24,7 @@ object User {
    */
   def findByEmail(email: String): Option[User] = {
     DB readOnly { implicit session =>
-      SQL("select * from user where email = ?").bind(email).map(simple).single.apply()
+      SQL("select * from user where email = {email}").bindByName('email -> email).map(simple).single.apply()
     }
   }
   
@@ -45,9 +45,9 @@ object User {
       SQL(
         """
          select * from user where 
-         email = ? and password = ?
+         email = {email} and password = {password}
         """
-      ).bind(email, password).map(simple).single.apply()
+      ).bindByName('email -> email, 'password -> password).map(simple).single.apply()
     }
   }
    
@@ -59,10 +59,14 @@ object User {
       SQL(
         """
           insert into user values (
-            ?, ?, ?
+            {email}, {name}, {password} 
           )
         """
-      ).bind(user.email, user.name, user.password).update.apply()
+      ).bindByName(
+        'email -> user.email, 
+        'name -> user.name, 
+        'password -> user.password
+      ).update.apply()
       user
     }
   }
