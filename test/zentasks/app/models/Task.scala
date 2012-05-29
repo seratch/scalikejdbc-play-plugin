@@ -31,29 +31,29 @@ object Task {
    * Parse a Task from a ResultSet
    */
   val simple = (rs: WrappedResultSet) => Task(
-     rs.long("id"), 
-     rs.string("folder"), 
-     rs.long("project"), 
-     rs.string("title"), 
-     rs.boolean("done"), 
-     Option(rs.timestamp("due_date")), 
-     Option(rs.string("assigned_to"))
+     id = rs.long("id"), 
+     folder = rs.string("folder"), 
+     project = rs.long("project"), 
+     title = rs.string("title"), 
+     done = rs.boolean("done"), 
+     dueDate = Option(rs.timestamp("due_date")), 
+     assignedTo = Option(rs.string("assigned_to"))
    )
   
   val withProject = (rs: WrappedResultSet) => (
     Task(
-      rs.long("task.id"),
-      rs.string("task.folder"), 
-      rs.long("task.project"), 
-      rs.string("task.title"), 
-      rs.boolean("task.done"), 
-      Option(rs.timestamp("task.due_date")), 
-      Option(rs.string("task.assigned_to"))
+      id = rs.long("task_id"),
+      folder = rs.string("folder"), 
+      project = rs.long("project_id"), 
+      title = rs.string("title"), 
+      done = rs.boolean("done"), 
+      dueDate = Option(rs.timestamp("due_date")), 
+      assignedTo = Option(rs.string("assigned_to"))
     ), 
     Project(
-      rs.long("project.id"), 
-      rs.string("project.folder"), 
-      rs.string("project.name")
+      id = rs.long("project_id"), 
+      folder = rs.string("folder"), 
+      name = rs.string("project_name")
     )
   )
   
@@ -75,10 +75,17 @@ object Task {
     DB readOnly { implicit session =>
       SQL(
         """
-          select * from task 
-          join project_member on project_member.project_id = task.project 
-          join project on project.id = project_member.project_id
-          where task.done = false and project_member.user_email = {user}
+          select 
+            task.id as task_id,
+            project.id as project_id,
+            project.name as project_name,
+            *
+          from 
+            task 
+            join project_member on project_member.project_id = task.project 
+            join project on project.id = project_member.project_id
+          where 
+            task.done = false and project_member.user_email = {user}
         """
       ).bindByName('user -> user).map(withProject).list.apply().toSeq
     }
@@ -159,7 +166,6 @@ object Task {
    */
   def create(task: NewTask): Task = {
     DB localTx { implicit session =>
-println(task.dueDate)
       val newId = SQL("select next value for task_seq as v from dual").map(rs => rs.long("v")).single.apply().get
       SQL(
         """
