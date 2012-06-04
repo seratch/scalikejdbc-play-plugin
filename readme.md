@@ -78,9 +78,9 @@ case class Project(id: Long, folder: String, name: String)
 object Project {
 
   private val * = (rs: WrappedResultSet) => Project(
-    rs.long("id"), 
-    rs.string("folder"), 
-    rs.string("name")
+    id = rs.long("id"), 
+    folder = rs.string("folder"), 
+    name = rs.string("name")
   )
 
   def find(id: Long)(implicit session: DBSession = AutoSession): Option[Project] = {
