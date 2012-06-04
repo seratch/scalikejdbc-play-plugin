@@ -84,7 +84,7 @@ object Project {
   )
 
   def find(id: Long)(implicit session: DBSession = AutoSession): Option[Project] = {
-    SQL("select * from project where id = ?").bind(id).map(*).single.apply()
+    SQL("select * from project where id = {id}").bindByName('id -> id).map(*).single.apply()
   }
 
 ...
