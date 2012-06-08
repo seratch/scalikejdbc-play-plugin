@@ -62,137 +62,119 @@ object Task {
   /**
    * Retrieve a Task from the id.
    */
-  def findById(id: Long): Option[Task] = {
-    DB readOnly { implicit session =>
-      SQL("select * from task where id = {id}").bindByName('id -> id).map(simple).single.apply()
-    }
+  def findById(id: Long)(implicit session: DBSession = AutoSession): Option[Task] = {
+    SQL("select * from task where id = {id}").bindByName('id -> id).map(simple).single.apply()
   }
   
   /**
    * Retrieve todo tasks for the user.
    */
-  def findTodoInvolving(user: String): Seq[(Task,Project)] = {
-    DB readOnly { implicit session =>
-      SQL(
-        """
-          select 
-            task.id as task_id,
-            project.id as project_id,
-            project.name as project_name,
-            *
-          from 
-            task 
-            join project_member on project_member.project_id = task.project 
-            join project on project.id = project_member.project_id
-          where 
-            task.done = false and project_member.user_email = {user}
-        """
-      ).bindByName('user -> user).map(withProject).list.apply().toSeq
-    }
+  def findTodoInvolving(user: String)(implicit session: DBSession = AutoSession): Seq[(Task,Project)] = {
+    SQL(
+      """
+        select 
+          task.id as task_id,
+          project.id as project_id,
+          project.name as project_name,
+          *
+        from 
+          task 
+          join project_member on project_member.project_id = task.project 
+          join project on project.id = project_member.project_id
+        where 
+          task.done = false and project_member.user_email = {user}
+      """
+    ).bindByName('user -> user).map(withProject).list.apply().toSeq
   }
   
   /**
    * Find tasks related to a project
    */
-  def findByProject(project: Long): Seq[Task] = {
-    DB readOnly { implicit session =>
-      SQL(
-        """
-          select * from task 
-          where task.project = {project}
-        """
-      ).bindByName('project -> project).map(simple).list.apply().toSeq
-    }
+  def findByProject(project: Long)(implicit session: DBSession = AutoSession): Seq[Task] = {
+    SQL(
+      """
+        select * from task 
+        where task.project = {project}
+      """
+    ).bindByName('project -> project).map(simple).list.apply().toSeq
   }
 
   /**
    * Delete a task
    */
-  def delete(id: Long) {
-    DB localTx { implicit session =>
-      SQL("delete from task where id = {id}").bindByName('id -> id).update.apply()
-    }
+  def delete(id: Long)(implicit session: DBSession = AutoSession) {
+    SQL("delete from task where id = {id}").bindByName('id -> id).update.apply()
   }
   
   /**
    * Delete all task in a folder.
    */
-  def deleteInFolder(projectId: Long, folder: String) {
-    DB localTx { implicit session =>
-      SQL("delete from task where project = {project} and folder = {folder}")
-        .bindByName('project -> projectId, 'foler -> folder).update.apply()
-    }
+  def deleteInFolder(projectId: Long, folder: String)(implicit session: DBSession = AutoSession) {
+    SQL("delete from task where project = {project} and folder = {folder}")
+      .bindByName('project -> projectId, 'foler -> folder).update.apply()
   }
   
   /**
    * Mark a task as done or not
    */
-  def markAsDone(taskId: Long, done: Boolean) {
-    DB localTx { implicit session =>
-      SQL("update task set done = {done} where id = {id}")
-        .bindByName('id -> taskId, 'done -> done).update.apply()
-    }
+  def markAsDone(taskId: Long, done: Boolean)(implicit session: DBSession = AutoSession) {
+    SQL("update task set done = {done} where id = {id}")
+      .bindByName('id -> taskId, 'done -> done).update.apply()
   }
   
   /**
    * Rename a folder.
    */
-  def renameFolder(projectId: Long, folder: String, newName: String) {
-    DB localTx { implicit session =>
-      SQL("update task set folder = {newFolder} where folder = {folder} and project = {project}")
-        .bindByName('folder -> folder, 'newFolder -> newName, 'project -> projectId).update.apply()
-    }
+  def renameFolder(projectId: Long, folder: String, newName: String)(implicit session: DBSession = AutoSession) {
+    SQL("update task set folder = {newFolder} where folder = {folder} and project = {project}")
+      .bindByName('folder -> folder, 'newFolder -> newName, 'project -> projectId).update.apply()
   }
   
   /**
    * Check if a user is the owner of this task
    */
-  def isOwner(task: Long, user: String): Boolean = {
-    DB readOnly { implicit session =>
-      SQL(
-        """
-          select count(task.id) = 1 as v from task 
-          join project on task.project = project.id 
-          join project_member on project_member.project_id = project.id 
-          where project_member.user_email = {user} and task.id = {task}
-        """
-      ).bindByName('user -> user, 'task -> task)
-        .map(rs => rs.boolean("v").asInstanceOf[Boolean]).single.apply().getOrElse(false)
-    }
+  def isOwner(task: Long, user: String)(implicit session: DBSession = AutoSession): Boolean = {
+    SQL(
+      """
+        select count(task.id) = 1 as v from task 
+        join project on task.project = project.id 
+        join project_member on project_member.project_id = project.id 
+        where project_member.user_email = {user} and task.id = {task}
+      """
+    ).bindByName('user -> user, 'task -> task)
+      .map(rs => rs.boolean("v").asInstanceOf[Boolean]).single.apply().getOrElse(false)
   }
 
   /**
    * Create a Task.
    */
-  def create(task: NewTask): Task = {
-    DB localTx { implicit session =>
-      val newId = SQL("select next value for task_seq as v from dual").map(rs => rs.long("v")).single.apply().get
-      SQL(
-        """
-          insert into task (id, folder, project, title, done, due_date, assigned_to) values (
-            {id}, {folder}, {project}, {title}, {done}, {dueDate}, {assignedTo} 
-          )
-        """
-      ).bindByName(
-        'id -> newId,
-        'folder -> task.folder, 
-        'project -> task.project, 
-        'title -> task.title, 
-        'done -> task.done,
-        'dueDate -> task.dueDate,
-        'assignedTo -> task.assignedTo
-      ).update.apply()
+  def create(task: NewTask)(implicit session: DBSession = AutoSession): Task = {
+    val newId = SQL("select next value for task_seq as v from dual").map(rs => rs.long("v")).single.apply().get
+    SQL(
+      """
+        insert into task (id, folder, project, title, done, due_date, assigned_to) values (
+          {id}, {folder}, {project}, {title}, {done}, {dueDate}, {assignedTo} 
+        )
+      """
+    ).bindByName(
+      'id -> newId,
+      'folder -> task.folder, 
+      'project -> task.project, 
+      'title -> task.title, 
+      'done -> task.done,
+      'dueDate -> task.dueDate,
+      'assignedTo -> task.assignedTo
+    ).update.apply()
 
-      Task(
-        id = newId,
-        folder = task.folder,
-        project = task.project,
-        title = task.title,
-        done = task.done,
-        dueDate = task.dueDate,
-        assignedTo = task.assignedTo
-      )
-    }
+    Task(
+      id = newId,
+      folder = task.folder,
+      project = task.project,
+      title = task.title,
+      done = task.done,
+      dueDate = task.dueDate,
+      assignedTo = task.assignedTo
+    )
   }
   
 }

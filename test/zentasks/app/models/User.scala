@@ -22,53 +22,45 @@ object User {
   /**
    * Retrieve a User from email.
    */
-  def findByEmail(email: String): Option[User] = {
-    DB readOnly { implicit session =>
-      SQL("select * from user where email = {email}").bindByName('email -> email).map(simple).single.apply()
-    }
+  def findByEmail(email: String)(implicit session: DBSession = AutoSession): Option[User] = {
+    SQL("select * from user where email = {email}").bindByName('email -> email).map(simple).single.apply()
   }
   
   /**
    * Retrieve all users.
    */
-  def findAll: Seq[User] = {
-    DB readOnly { implicit session =>
-      SQL("select * from user").map(simple).list.apply().toSeq
-    }
+  def findAll()(implicit session: DBSession = AutoSession): Seq[User] = {
+    SQL("select * from user").map(simple).list.apply().toSeq
   }
   
   /**
    * Authenticate a User.
    */
-  def authenticate(email: String, password: String): Option[User] = {
-    DB readOnly { implicit session =>
-      SQL(
-        """
-         select * from user where 
-         email = {email} and password = {password}
-        """
-      ).bindByName('email -> email, 'password -> password).map(simple).single.apply()
-    }
+  def authenticate(email: String, password: String)(implicit session: DBSession = AutoSession): Option[User] = {
+    SQL(
+      """
+       select * from user where 
+       email = {email} and password = {password}
+      """
+    ).bindByName('email -> email, 'password -> password).map(simple).single.apply()
   }
    
   /**
    * Create a User.
    */
-  def create(user: User): User = {
-    DB localTx { implicit session =>
-      SQL(
-        """
-          insert into user values (
-            {email}, {name}, {password} 
-          )
-        """
-      ).bindByName(
-        'email -> user.email, 
-        'name -> user.name, 
-        'password -> user.password
-      ).update.apply()
-      user
-    }
+  def create(user: User)(implicit session: DBSession = AutoSession): User = {
+    SQL(
+      """
+        insert into user values (
+          {email}, {name}, {password} 
+        )
+      """
+    ).bindByName(
+      'email -> user.email, 
+      'name -> user.name, 
+      'password -> user.password
+    ).update.apply()
+    user
   }
   
 }
