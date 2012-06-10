@@ -9,7 +9,7 @@ object MyBuild extends Build {
     sbtPlugin := false,
     organization := "com.github.seratch",
     name := "scalikejdbc-play-plugin",
-    version := "1.2.3",
+    version := "1.3.0",
     scalaVersion := "2.9.1",
     externalResolvers ~= (_.filter(_.name != "Scala-Tools Maven2 Repository")),
     resolvers ++= Seq(
