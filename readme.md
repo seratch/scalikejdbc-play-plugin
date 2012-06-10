@@ -6,13 +6,26 @@ Wrapped JDBC for Scala.
 
 https://github.com/seratch/scalikejdbc
 
+
 ## Play 2.0 Scala
 
 ScalikeJDBC works with Play20 seamlessly.
 
 http://www.playframework.org/documentation/2.0/ScalaHome
 
-## How to use?
+
+## g8 template
+
+https://github.com/seratch/play-with-scalikejdbc.g8
+
+If you know giter8, try the template now as follows.
+
+```sh
+g8 seratch/play-with-scalikejdbc
+```
+
+
+## Setting up manually
 
 See Zentasks example in detail.
 
