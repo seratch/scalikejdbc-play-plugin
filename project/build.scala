@@ -18,8 +18,8 @@ object MyBuild extends Build {
     libraryDependencies <++= (scalaVersion) { scalaVersion =>
       Seq(
         "com.github.seratch" %% "scalikejdbc" % "1.3.0",
-        "play" %% "play" % "[2,)" % "provided",
-        "play" %% "play-test" % "[2,)" % "test"
+        "play" %% "play" % "2.0.1" % "provided",
+        "play" %% "play-test" % "2.0.1" % "test"
       )
     },
     publishTo <<= version { (v: String) =>

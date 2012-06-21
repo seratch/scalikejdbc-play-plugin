@@ -26,32 +26,37 @@ class PlayPlugin(app: Application) extends Plugin {
 
   private lazy val dbConfig = app.configuration.getConfig("db").getOrElse(Configuration.empty)
 
-  dbConfig.subKeys map {
-    name =>
-      def load(name: String): (String, String, String, ConnectionPoolSettings) = {
-        implicit val config = dbConfig
-        Class.forName(require(name, "driver"))
-        val default = new ConnectionPoolSettings
-        val settings = new ConnectionPoolSettings(
-          initialSize = opt(name, "poolInitialSize").map(v => v.toInt).getOrElse(default.initialSize),
-          maxSize = opt(name, "poolMaxSize").map(v => v.toInt).getOrElse(default.maxSize),
-          validationQuery = opt(name, "poolValidationQuery").getOrElse(default.validationQuery)
-        )
-        (require(name, "url"), opt(name, "user").getOrElse(""), opt(name, "password").getOrElse(""), settings)
-      }
+  state.synchronized {
+    if (!state.isInitialized) {
 
-      name match {
-        case "global" =>
-          Logger(classOf[PlayPlugin]).warn(
-            "Configuration with \"db.global\" is ignored. Use \"scalikejdbc.global\" instead.")
-        case "default" =>
-          val (url, user, password, settings) = load(name)
-          ConnectionPool.singleton(url, user, password, settings)
-        case _ =>
-          val (url, user, password, settings) = load(name)
-          ConnectionPool.add(Symbol(name), url, user, password, settings)
-      }
+      dbConfig.subKeys map {
+        name =>
+          def load(name: String): (String, String, String, ConnectionPoolSettings) = {
+            implicit val config = dbConfig
+            Class.forName(require(name, "driver"))
+            val default = new ConnectionPoolSettings
+            val settings = new ConnectionPoolSettings(
+              initialSize = opt(name, "poolInitialSize").map(v => v.toInt).getOrElse(default.initialSize),
+              maxSize = opt(name, "poolMaxSize").map(v => v.toInt).getOrElse(default.maxSize),
+              validationQuery = opt(name, "poolValidationQuery").getOrElse(default.validationQuery)
+            )
+            (require(name, "url"), opt(name, "user").getOrElse(""), opt(name, "password").getOrElse(""), settings)
+          }
 
+          name match {
+            case "global" =>
+              Logger(classOf[PlayPlugin]).warn(
+                "Configuration with \"db.global\" is ignored. Use \"scalikejdbc.global\" instead.")
+            case "default" =>
+              val (url, user, password, settings) = load(name)
+              ConnectionPool.singleton(url, user, password, settings)
+            case _ =>
+              val (url, user, password, settings) = load(name)
+              ConnectionPool.add(Symbol(name), url, user, password, settings)
+          }
+          state.isInitialized = true
+      }
+    }
   }
 
   private lazy val globalConfig = app.configuration.getConfig("scalikejdbc.global").getOrElse(Configuration.empty)
@@ -73,6 +78,9 @@ class PlayPlugin(app: Application) extends Plugin {
 }
 
 object PlayPlugin {
+
+  class State(var isInitialized: Boolean)
+  private var state: State = new State(false)
 
   def opt(name: String, key: String)(implicit config: Configuration): Option[String] = {
     config.getString(name + "." + key)
