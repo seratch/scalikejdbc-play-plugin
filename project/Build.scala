@@ -9,7 +9,7 @@ object MyBuild extends Build {
     sbtPlugin := false,
     organization := "com.github.seratch",
     name := "scalikejdbc-play-plugin",
-    version := "1.3.0",
+    version := "1.3.1",
     scalaVersion := "2.9.1",
     externalResolvers ~= (_.filter(_.name != "Scala-Tools Maven2 Repository")),
     resolvers ++= Seq(
@@ -17,7 +17,7 @@ object MyBuild extends Build {
     ),
     libraryDependencies <++= (scalaVersion) { scalaVersion =>
       Seq(
-        "com.github.seratch" %% "scalikejdbc" % "1.3.0",
+        "com.github.seratch" %% "scalikejdbc" % "1.3.1",
         "play" %% "play" % "2.0.1" % "provided",
         "play" %% "play-test" % "2.0.1" % "test"
       )
