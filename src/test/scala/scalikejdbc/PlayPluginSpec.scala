@@ -12,7 +12,7 @@ import play.api.Play.current
 
 object PlayPluginSpec extends Specification {
 
-  lazy val fakeApp = FakeApplication(
+  def fakeApp = FakeApplication(
     additionalPlugins = Seq("scalikejdbc.PlayPlugin"),
     additionalConfiguration = Map(
       "logger.root" -> "INFO",
@@ -80,6 +80,8 @@ object PlayPluginSpec extends Specification {
   "Play plugin" should {
 
     "be available when DB plugin is not active" in {
+      running(fakeApp) { simpleTest }
+      running(fakeApp) { simpleTest }
       running(fakeApp) { simpleTest }
     }
 
