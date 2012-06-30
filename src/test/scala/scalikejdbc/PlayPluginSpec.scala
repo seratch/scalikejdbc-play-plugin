@@ -58,24 +58,24 @@ object PlayPluginSpec extends Specification {
 
   def plugin = fakeApp.plugin[PlayPlugin].get
 
-  def simpleTest = {
+  def simpleTest(table: String) = {
     try {
       case class User(id: Long, name: Option[String])
       DB autoCommit { implicit s =>
-        SQL("DROP TABLE USER IF EXISTS").execute.apply()
-        SQL("CREATE TABLE USER (ID BIGINT PRIMARY KEY NOT NULL, NAME VARCHAR(256))").execute.apply()
-        val insert = SQL("INSERT INTO USER (ID, NAME) VALUES (/*'id*/123, /*'name*/'Alice')")
+        SQL("DROP TABLE " + table + " IF EXISTS").execute.apply()
+        SQL("CREATE TABLE " + table + " (ID BIGINT PRIMARY KEY NOT NULL, NAME VARCHAR(256))").execute.apply()
+        val insert = SQL("INSERT INTO " + table + " (ID, NAME) VALUES (/*'id*/123, /*'name*/'Alice')")
         insert.bindByName('id -> 1, 'name -> "Alice").update.apply()
         insert.bindByName('id -> 2, 'name -> "Bob").update.apply()
         insert.bindByName('id -> 3, 'name -> "Eve").update.apply()
       }
       val users = DB readOnly { implicit s =>
-        SQL("SELECT * FROM USER").map(rs => User(rs.long("id"), Option(rs.string("name")))).list.apply()
+        SQL("SELECT * FROM " + table).map(rs => User(rs.long("id"), Option(rs.string("name")))).list.apply()
       }
       users.size should equalTo(3)
     } finally {
       DB autoCommit { implicit s =>
-        SQL("DROP TABLE USER IF EXISTS").execute.apply()
+        SQL("DROP TABLE " + table + " IF EXISTS").execute.apply()
       }
     }
   }
@@ -83,13 +83,13 @@ object PlayPluginSpec extends Specification {
   "Play plugin" should {
 
     "be available when DB plugin is not active" in {
-      running(fakeApp) { simpleTest }
-      running(fakeApp) { simpleTest }
-      running(fakeApp) { simpleTest }
+      running(fakeApp) { simpleTest("user_1") }
+      running(fakeApp) { simpleTest("user_2") }
+      running(fakeApp) { simpleTest("user_3") }
     }
 
     "be available when DB plugin is also active" in {
-      running(fakeAppWithDBPlugin) { simpleTest }
+      running(fakeAppWithDBPlugin) { simpleTest("user_withdbplugin") }
     }
 
   }
