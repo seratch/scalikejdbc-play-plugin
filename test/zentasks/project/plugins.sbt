@@ -7,7 +7,7 @@ resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/release
 resolvers += "idea" at "http://mpeltonen.github.com/maven/"
 
 // Use the Play sbt plugin for Play projects
-addSbtPlugin("play" % "sbt-plugin" % Option(System.getProperty("play.version")).getOrElse("2.0.1"))
+addSbtPlugin("play" % "sbt-plugin" % Option(System.getProperty("play.version")).getOrElse("2.0.2"))
 
 addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.0.0")
 

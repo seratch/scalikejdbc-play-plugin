@@ -9,8 +9,9 @@ object MyBuild extends Build {
     sbtPlugin := false,
     organization := "com.github.seratch",
     name := "scalikejdbc-play-plugin",
-    version := "1.3.2",
+    version := "1.3.3",
     scalaVersion := "2.9.1",
+    crossScalaVersions := Seq("2.9.2", "2.9.1"),
     externalResolvers ~= (_.filter(_.name != "Scala-Tools Maven2 Repository")),
     resolvers ++= Seq(
       "sonatype" at "https://oss.sonatype.org/content/repositories/releases",
@@ -18,9 +19,9 @@ object MyBuild extends Build {
     ),
     libraryDependencies <++= (scalaVersion) { scalaVersion =>
       Seq(
-        "com.github.seratch" %% "scalikejdbc" % "1.3.2",
-        "play" %% "play" % "2.0.1" % "provided",
-        "play" %% "play-test" % "2.0.1" % "test"
+        "com.github.seratch" %% "scalikejdbc" % "1.3.3",
+        "play" % "play_2.9.1" % "2.0.2" % "provided",
+        "play" % "play-test_2.9.1" % "2.0.2" % "test"
       )
     },
     publishTo <<= version { (v: String) =>

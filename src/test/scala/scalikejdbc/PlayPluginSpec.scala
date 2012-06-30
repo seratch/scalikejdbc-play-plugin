@@ -13,6 +13,7 @@ import play.api.Play.current
 object PlayPluginSpec extends Specification {
 
   def fakeApp = FakeApplication(
+    withoutPlugins = Seq("play.api.cache.EhCachePlugin"),
     additionalPlugins = Seq("scalikejdbc.PlayPlugin"),
     additionalConfiguration = Map(
       "logger.root" -> "INFO",
@@ -39,6 +40,7 @@ object PlayPluginSpec extends Specification {
   )
 
   lazy val fakeAppWithDBPlugin = FakeApplication(
+    withoutPlugins = Seq("play.api.cache.EhCachePlugin"),
     additionalPlugins = Seq("scalikejdbc.PlayPlugin"),
     additionalConfiguration = Map(
       "db.default.driver" -> "org.h2.Driver",
@@ -60,6 +62,7 @@ object PlayPluginSpec extends Specification {
     try {
       case class User(id: Long, name: Option[String])
       DB autoCommit { implicit s =>
+        SQL("DROP TABLE USER IF EXISTS").execute.apply()
         SQL("CREATE TABLE USER (ID BIGINT PRIMARY KEY NOT NULL, NAME VARCHAR(256))").execute.apply()
         val insert = SQL("INSERT INTO USER (ID, NAME) VALUES (/*'id*/123, /*'name*/'Alice')")
         insert.bindByName('id -> 1, 'name -> "Alice").update.apply()
@@ -72,7 +75,7 @@ object PlayPluginSpec extends Specification {
       users.size should equalTo(3)
     } finally {
       DB autoCommit { implicit s =>
-        SQL("DROP TABLE USER").execute.apply()
+        SQL("DROP TABLE USER IF EXISTS").execute.apply()
       }
     }
   }
